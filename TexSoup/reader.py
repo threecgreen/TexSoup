@@ -86,19 +86,19 @@ def token(name):
     return wrap
 
 
-# @token('punctuation_command')
-# def tokenize_punctuation_command(text):
-#     """Process command that augments or modifies punctuation.
-#
-#     This is important to the tokenization of a string, as opening or closing
-#     punctuation is not supposed to match.
-#
-#     :param Buffer text: iterator over text, with current position
-#     """
-#     if text.peek() == '\\':
-#         for string in PUNCTUATION_COMMANDS:
-#             if text.peek(len(string)) == string:
-#                 return text.forward(len(string) + 1)
+@token('punctuation_command')
+def tokenize_punctuation_command(text):
+    """Process command that augments or modifies punctuation.
+
+    This is important to the tokenization of a string, as opening or closing
+    punctuation is not supposed to match.
+
+    :param Buffer text: iterator over text, with current position
+    """
+    if text.peek() == '\\':
+        for string in PUNCTUATION_COMMANDS:
+            if text.peek(len(string)) == string:
+                return text.forward(len(string) + 1)
 
 
 @token('command')
