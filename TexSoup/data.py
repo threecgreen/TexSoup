@@ -6,8 +6,10 @@ Includes the data structures that users will interface with, in addition to
 internally used data structures.
 """
 import itertools
+import string
 
-__all__ = ['TexNode', 'TexCmd', 'TexEnv', 'Arg', 'OArg', 'RArg', 'TexArgs']
+__all__ = ['TexNode', 'TexCmd', 'TexEnv', 'Arg', 'PArg', 'OArg', 'RArg',
+           'TexArgs']
 
 #############
 # Interface #
@@ -356,8 +358,8 @@ class Arg(object):
             return s
         if isinstance(s, (list, tuple)):
             for arg in args:
-                if [s[0], s[-1]] == arg.delims():
-                    return arg(*s[1:-1])
+                if arg.qualifies(s):
+                    return arg(*s)
             raise TypeError('Malformed argument. First and last elements must '
                             'match a valid argument format:', s)
         for arg in args:
@@ -371,9 +373,9 @@ class Arg(object):
         return self.value[i]
 
     @classmethod
-    def delims(cls):
-        """Returns delimiters"""
-        return cls.fmt.split('%s')
+    def qualifies(cls, s):
+        """Checks if the provided string could be this argument."""
+        raise NotImplementedError()
 
     @classmethod
     def __is__(cls, s):
@@ -405,6 +407,13 @@ class OArg(Arg):
     fmt = '[%s]'
     type = 'optional'
 
+    def __init__(self, exprs):
+        super().__init__(exprs)
+        self.exprs = exprs[1: -1]
+
+    def qualifies(self, s):
+        return (s[0], s[-1]) == ('[', ']')
+
 
 class RArg(Arg):
     """Required argument."""
@@ -412,7 +421,25 @@ class RArg(Arg):
     fmt = '{%s}'
     type = 'required'
 
-args = (OArg, RArg)
+    def __init__(self, exprs):
+        super().__init__(exprs)
+        self.exprs = exprs[1: -1]
+
+    def qualifies(self, s):
+        return (s[0], s[-1]) == ('{', '}')
+
+
+class PArg(Arg):
+    """Punctuation as argument."""
+
+    fmt = '%s'
+    type = 'punctuation'
+
+    def qualifies(self, s):
+        return len(s) == 1 and s in string.punctuation
+
+
+args = (OArg, RArg, PArg)
 
 
 class TexArgs(list):
@@ -437,6 +464,9 @@ class TexArgs(list):
     OArg('arg3')
     >>> len(args)
     4
+    >>> args.append('.')
+    >>> args(4)
+    .
     """
 
     def __init__(self, *args):
