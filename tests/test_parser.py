@@ -377,6 +377,16 @@ def test_non_punctuation_command_structure():
     assert len(list(soup.contents)) == 4, '* not recognized as part of command.'
 
 
+def test_escaped_backslash_before_formula():
+    """Tests that having an escaped backslash immediately before a formula, is
+    correctly parsed and does not raise an EOFErrror.
+
+    See issue #55."""
+    soup = TexSoup(r"""\begin{env}
+    Some text here\\$x = 5$
+    \end{env}""")
+
+
 ##########
 # BUFFER #
 ##########

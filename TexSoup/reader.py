@@ -366,10 +366,10 @@ def read_env(src, expr):
     """
     contents = []
     if expr.name in SKIP_ENVS:
-        contents = [src.forward_until(lambda s: s == '\\end')]
-    while src.hasNext() and not src.startswith('\\end{%s}' % expr.name):
+        contents = [src.forward_until(lambda s: s == r'\end')]
+    while src.hasNext() and not src.startswith(r'\end{%s}' % expr.name):
         contents.append(read_tex(src))
-    if not src.startswith('\\end{%s}' % expr.name):
+    if not src.startswith(r'\end{%s}' % expr.name):
         end = src.peek((0, 5))
         explanation = 'Instead got %s' % end if end else 'Reached end of file.'
         raise EOFError('Expecting \\end{%s}. %s' % (expr.name, explanation))
